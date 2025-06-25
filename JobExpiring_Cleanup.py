@@ -1,54 +1,66 @@
-from datetime import datetime, timedelta
+from typing import List
 
-class JobExpiring_Cleanup:
-    def __init__(self, expiry_minutes=30):
+class PrintJob:
+    def __init__(self, job_id):
+        self.job_id = job_id
+        self.status = None
+
+    def is_expired(self, current_time):
+        return True
+
+class JobStatus:
+    EXPIRED = "Expired"
+
+class CircularQueue:
+    def __init__(self):
         self.jobs = []
-        self.expiry_minutes = expiry_minutes
 
-    def add_job(self, job_id, user_id):
-        job = {
-            'job_id': job_id,
-            'user_id': user_id,
-            'created_at': datetime.now()
-        }
-        self.jobs.append(job)
-        print(f"[INFO] Job {job_id} added at {job['created_at']} by User {user_id}.")
+    def get_all_jobs(self):
+        return self.jobs
 
-
-    def get_waiting_time(self, job):
-        return datetime.now() - job['created_at']
-
-    def is_expired(self, job):
-        return self.get_waiting_time(job) > timedelta(minutes=self.expiry_minutes)
-
-    def notify_expiry(self, job):
-        print(f"[NOTIFY] Job {job['job_id']} for User {job['user_id']} has expired.")
-
-    def remove_expired_jobs(self):
-
-        remaining_jobs = []
+    def remove_job(self, job_id):
         for job in self.jobs:
-            if self.is_expired(job):
-                self.notify_expiry(job)
-            else:
-                remaining_jobs.append(job)
-        self.jobs = remaining_jobs
+            if job.job_id == job_id:
+                self.jobs.remove(job)
+                return True
+        return False
 
-    def show_status(self):
-        print(f"[STATUS] Current Jobs ({len(self.jobs)}):")
-        for job in self.jobs:
-            wait_time = self.get_waiting_time(job)
-            print(f"  - Job {job['job_id']} | User {job['user_id']} | Waiting {wait_time}")
+class JobExpiryHandler:
+    """Handles job expiration and cleanup"""
 
+    def __init__(self, default_expiry: float = 30.0):
+        self.default_expiry = default_expiry
+        self.expired_jobs: List[PrintJob] = []
 
+    def remove_expired_jobs(self, queue: 'CircularQueue', current_time: float) -> int:
+        """Remove jobs that have exceeded their expiry time"""
+        expired_count = 0
+        expired_job_ids = []
+
+        all_jobs = queue.get_all_jobs()
+
+        for job in all_jobs:
+            if job.is_expired(current_time):
+                expired_job_ids.append(job.job_id)
+
+        for job_id in expired_job_ids:
+            if queue.remove_job(job_id):
+                for job in all_jobs + self.expired_jobs:
+                    if job.job_id == job_id:
+                        job.status = JobStatus.EXPIRED
+                        self.expired_jobs.append(job)
+                        break
+                expired_count += 1
+
+        return expired_count
+
+    def notify_job_expiry(self, expired_job: 'PrintJob') -> None:
+        print(f"Job {expired_job.job_id} has expired.")
+
+# Example usage
 if __name__ == "__main__":
-    system = JobExpiring_Cleanup(expiry_minutes=0.05)
-
-    system.add_job(1, 101)
-    system.add_job(2, 102)
-
-    import time
-    time.sleep(5)
-
-    system.remove_expired_jobs()
-    system.show_status()
+    q = CircularQueue()
+    q.jobs = [PrintJob("job1"), PrintJob("job2")]
+    handler = JobExpiryHandler()
+    expired = handler.remove_expired_jobs(q, current_time=999.0)
+    print(f"Expired jobs removed: {expired}")
