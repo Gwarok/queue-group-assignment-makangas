@@ -1,12 +1,10 @@
 class PriorityAgingSystem:
 
-
     def _init_(self, aging_interval: float = 5.0, aging_increment: int = 1):
         self.aging_interval = aging_interval
         self.aging_increment = aging_increment
 
     def apply_priority_aging(self, queue: CircularQueue, current_time: float) -> int:
-
         aged_count = 0
         jobs_to_reorder = []
 
