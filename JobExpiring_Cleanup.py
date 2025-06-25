@@ -14,6 +14,7 @@ class JobExpiring_Cleanup:
         self.jobs.append(job)
         print(f"[INFO] Job {job_id} added at {job['created_at']} by User {user_id}.")
 
+
     def get_waiting_time(self, job):
         return datetime.now() - job['created_at']
 
