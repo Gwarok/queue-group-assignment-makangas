@@ -15,11 +15,6 @@ class Queue:
     def is_empty(self):
         return len(self.items) == 0
 
-
-    def display(self):
-        
-        return self.items.copy()
-
     def checkout(self):
         if self.is_empty():
             return "No patients to checkout."
