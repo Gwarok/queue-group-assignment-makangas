@@ -15,8 +15,9 @@ class Queue:
     def is_empty(self):
         return len(self.items) == 0
 
-    # (Added) Display method to show patients in queue
+
     def display(self):
+        
         return self.items.copy()
 
     def checkout(self):
