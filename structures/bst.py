@@ -17,7 +17,7 @@ class BST:
         if patient.name < node.patient.name:
             node.left=self._insert_recursive(node.left,patient)
         else:
-            node.right = self._insert_recursive(node.roght,patient)
+            node.right = self._insert_recursive(node.right,patient)
         return node
 
     def inorder_traversal(self):
