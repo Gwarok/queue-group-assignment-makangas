@@ -59,6 +59,10 @@ class PatientApp:
         self.selected_id = None
         self.load_patients()
 
+        # Checkout Button
+        self.checkout_btn = tk.Button(root, text="Checkout Patient", command=self.checkout_patient)
+        self.checkout_btn.pack(pady=5)
+
     def add_patient(self):
         name = self.name_var.get().strip()
         age = self.age_var.get().strip()
@@ -147,9 +151,14 @@ class PatientApp:
         queue_window = tk.Toplevel(self.root)
         queue_window.title("Appointment Queue")
 
+
         tk.Label(queue_window, text="Patients in Queue:", font=("Arial", 12)).pack(pady=10)
         queue_listbox = tk.Listbox(queue_window, width=40)
         queue_listbox.pack(padx=10, pady=10)
 
         for item in self.appointment_queue.display():
             queue_listbox.insert(tk.END, item)
+
+    def checkout_patient(self):
+        result = self.appointment_queue.checkout()
+        messagebox.showinfo("Checkout Result", result)
