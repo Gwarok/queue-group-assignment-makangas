@@ -4,6 +4,7 @@ from tkinter import messagebox, ttk
 from database import DatabaseManager
 from patient import Patient
 from datastructures.queue import Queue
+from datastructures.binarySearch import BST
 
 class PatientApp:
     def __init__(self, root):
@@ -62,6 +63,10 @@ class PatientApp:
         # Checkout Button
         self.checkout_btn = tk.Button(root, text="Checkout Patient", command=self.checkout_patient)
         self.checkout_btn.pack(pady=5)
+
+        # Sort Button
+        self.sort_btn = tk.Button(root, text="Sort Patients Alphabetically", command=self.sort_patients)
+        self.sort_btn.pack(pady=5)
 
     def add_patient(self):
         name = self.name_var.get().strip()
@@ -162,3 +167,21 @@ class PatientApp:
     def checkout_patient(self):
         result = self.appointment_queue.checkout()
         messagebox.showinfo("Checkout Result", result)
+
+    def sort_patients(self):
+        bst = BST()
+        patients = self.db.get_all_patients()
+
+        for row in patients:
+            patient = Patient(row[0], row[1], row[2], row[3])
+            bst.insert(patient)
+
+        sorted_patients = bst.inorder_traversal()
+
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+
+        for patient in sorted_patients:
+            self.tree.insert("", "end", values=(patient.id, patient.name, patient.age, patient.gender))
+
+        messagebox.showinfo("Sorted", "Patients sorted alphabetically by name.")
