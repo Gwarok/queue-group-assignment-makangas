@@ -18,3 +18,9 @@ class Queue:
     # (Added) Display method to show patients in queue
     def display(self):
         return self.items.copy()
+
+    def checkout(self):
+        if self.is_empty():
+            return "No patients to checkout."
+        patient = self.dequeue()
+        return f"Checked out patient: {patient}"
